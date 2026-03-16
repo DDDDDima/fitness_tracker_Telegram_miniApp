@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fitness Tracker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tg: {
+                            bg: 'var(--tg-theme-bg-color, #ffffff)',
+                            text: 'var(--tg-theme-text-color, #000000)',
+                            hint: 'var(--tg-theme-hint-color, #999999)',
+                            link: 'var(--tg-theme-link-color, #2481cc)',
+                            button: 'var(--tg-theme-button-color, #2481cc)',
+                            buttonText: 'var(--tg-theme-button-text-color, #ffffff)',
+                            secondaryBg: 'var(--tg-theme-secondary-bg-color, #f0f0f0)',
+                            headerBg: 'var(--tg-theme-header-bg-color, #ffffff)',
+                            accentTeal: '#14b8a6',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body class="bg-tg-bg text-tg-text font-sans antialiased">
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="sticky top-0 z-50 bg-tg-headerBg/80 backdrop-blur-md border-b border-tg-secondaryBg p-4 shadow-sm flex items-center justify-between">
+            <h1 class="text-xl font-bold bg-gradient-to-r from-tg-link to-tg-accentTeal bg-clip-text text-transparent">FitTrack</h1>
+            <div id="user-profile" class="flex items-center space-x-2 text-sm">
+                <span id="user-name" class="font-medium text-tg-hint">Loading...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="flex-1 p-4 pb-20 overflow-y-auto">
+            <!-- Loading State -->
+            <div id="view-loading" class="flex flex-col items-center justify-center h-full space-y-4">
+                <div class="w-10 h-10 border-4 border-tg-secondaryBg border-t-tg-button rounded-full animate-spin"></div>
+                <p class="text-tg-hint">Оновлюємо дані...</p>
+            </div>
+
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="hidden space-y-6">
+                <!-- Modes Tabs -->
+                <div id="tabs-container" class="flex p-1 bg-tg-secondaryBg rounded-xl hidden">
+                    <button id="btn-tab-personal" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-tg-bg shadow-sm text-tg-text transition-all">Особисте</button>
+                    <button id="btn-tab-coach" class="flex-1 py-2 text-sm font-medium rounded-lg text-tg-hint transition-all">Тренер</button>
+                </div>
+
+                <!-- Personal Container -->
+                <div id="container-personal" class="space-y-4"></div>
+
+                <!-- Coach Container -->
+                <div id="container-coach" class="hidden space-y-4"></div>
+            </div>
+        </main>
+
+        <!-- FAB (Floating Action Button) -->
+        <button id="fab-add" class="fixed bottom-6 right-6 w-14 h-14 bg-tg-button text-tg-buttonText rounded-full shadow-lg shadow-tg-button/30 flex items-center justify-center transform transition-transform active:scale-95 hidden z-40">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden flex items-end sm:items-center justify-center transition-opacity">
+        <div id="modal-content" class="bg-tg-bg w-full sm:w-[400px] rounded-t-2xl sm:rounded-2xl p-6 pb-8 shadow-2xl border border-tg-secondaryBg transform transition-transform translate-y-full sm:translate-y-0 relative max-h-[90vh] overflow-y-auto">
+        </div>
+    </div>
+
+    <!-- App Logic -->
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>
