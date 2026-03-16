@@ -1,0 +1,54 @@
+/* Base resets and fixes for Telegram WebApp environment */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Prevent body scroll, handle scroll in main-content */
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Glassmorphism utilities */
+.glass-card {
+    background: var(--tg-theme-secondary-bg-color, rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    backdrop-filter: blur(8px);
+    border-radius: 1rem;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+.slide-up {
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Inputs and interactive elements */
+.tg-input {
+    background-color: var(--tg-theme-bg-color, #fff);
+    color: var(--tg-theme-text-color, #000);
+    border: 1px solid var(--tg-theme-hint-color, #ddd);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.tg-input:focus {
+    border-color: var(--tg-theme-button-color, #2481cc);
+    box-shadow: 0 0 0 2px rgba(36, 129, 204, 0.2);
+}
