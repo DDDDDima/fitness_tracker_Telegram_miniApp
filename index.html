@@ -1,90 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fitness Tracker</title>
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Easy FIT</title>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Tailwind CSS Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Style Settings -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        tg: {
-                            bg: 'var(--tg-theme-bg-color, #ffffff)',
-                            text: 'var(--tg-theme-text-color, #000000)',
-                            hint: 'var(--tg-theme-hint-color, #999999)',
-                            link: 'var(--tg-theme-link-color, #2481cc)',
-                            button: 'var(--tg-theme-button-color, #2481cc)',
-                            buttonText: 'var(--tg-theme-button-text-color, #ffffff)',
-                            secondaryBg: 'var(--tg-theme-secondary-bg-color, #f0f0f0)',
-                            headerBg: 'var(--tg-theme-header-bg-color, #ffffff)',
-                            accentTeal: '#14b8a6',
+                        brand: {
+                            super: '#2563eb',
+                            dark: '#0f172a', /* slate-900 */
+                            card: '#1e293b', /* slate-800 */
+                            light: '#f8fafc', /* slate-50 */
+                            accent: '#38bdf8' /* light blue */
                         }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Telegram Web App SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Custom Styles -->
     <link rel="stylesheet" href="./css/styles.css">
 </head>
-<body class="bg-tg-bg text-tg-text font-sans antialiased">
-    <div id="app" class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="sticky top-0 z-50 bg-tg-headerBg/80 backdrop-blur-md border-b border-tg-secondaryBg p-4 shadow-sm flex items-center justify-between">
-            <h1 class="text-xl font-bold bg-gradient-to-r from-tg-link to-tg-accentTeal bg-clip-text text-transparent">FitTrack</h1>
-            <div id="user-profile" class="flex items-center space-x-2 text-sm">
-                <span id="user-name" class="font-medium text-tg-hint">Loading...</span>
-            </div>
-        </header>
+<body class="bg-brand-dark text-brand-light font-sans antialiased overflow-hidden select-none">
+    
+    <!-- App Container where views are loaded -->
+    <main id="app-container" class="h-screen w-full relative overflow-y-auto pb-24 safe-area-pb fade-in"></main>
 
-        <!-- Main Content -->
-        <main id="main-content" class="flex-1 p-4 pb-20 overflow-y-auto">
-            <!-- Loading State -->
-            <div id="view-loading" class="flex flex-col items-center justify-center h-full space-y-4">
-                <div class="w-10 h-10 border-4 border-tg-secondaryBg border-t-tg-button rounded-full animate-spin"></div>
-                <p class="text-tg-hint">Оновлюємо дані...</p>
-            </div>
-
-            <!-- Dashboard View -->
-            <div id="view-dashboard" class="hidden space-y-6">
-                <!-- Modes Tabs -->
-                <div id="tabs-container" class="flex p-1 bg-tg-secondaryBg rounded-xl hidden">
-                    <button id="btn-tab-personal" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-tg-bg shadow-sm text-tg-text transition-all">Особисте</button>
-                    <button id="btn-tab-coach" class="flex-1 py-2 text-sm font-medium rounded-lg text-tg-hint transition-all">Тренер</button>
-                </div>
-
-                <!-- Personal Container -->
-                <div id="container-personal" class="space-y-4"></div>
-
-                <!-- Coach Container -->
-                <div id="container-coach" class="hidden space-y-4"></div>
-            </div>
-        </main>
-
-        <!-- FAB (Floating Action Button) -->
-        <button id="fab-add" class="fixed bottom-6 right-6 w-14 h-14 bg-tg-button text-tg-buttonText rounded-full shadow-lg shadow-tg-button/30 flex items-center justify-center transform transition-transform active:scale-95 hidden z-40">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full bg-brand-card/90 backdrop-blur-md border-t border-slate-700/50 flex justify-around p-3 z-50 rounded-t-3xl shadow-[0_0_20px_rgba(0,0,0,0.5)] safe-area-pb">
+        <button onclick="window.router.navigate('catalog')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-brand-accent transition-colors nav-btn" id="nav-catalog">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <span class="text-[10px] font-medium uppercase tracking-wider">Тренування</span>
         </button>
-    </div>
+        <button onclick="window.router.navigate('profile')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-brand-accent transition-colors nav-btn" id="nav-profile">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span class="text-[10px] font-medium uppercase tracking-wider">Профіль</span>
+        </button>
+    </nav>
 
-    <!-- Modal Backdrop -->
-    <div id="modal-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden flex items-end sm:items-center justify-center transition-opacity">
-        <div id="modal-content" class="bg-tg-bg w-full sm:w-[400px] rounded-t-2xl sm:rounded-2xl p-6 pb-8 shadow-2xl border border-tg-secondaryBg transform transition-transform translate-y-full sm:translate-y-0 relative max-h-[90vh] overflow-y-auto">
-        </div>
-    </div>
-
-    <!-- App Logic -->
+    <!-- Main Module -->
     <script type="module" src="./js/app.js"></script>
+
 </body>
 </html>

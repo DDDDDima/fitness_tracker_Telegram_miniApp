@@ -1,62 +1,35 @@
-// Wrapper for Telegram SDK to simplify interactions
+// Wrapper and utilities for window.Telegram.WebApp
+const tg = window.Telegram?.WebApp;
 
-const tg = window.Telegram.WebApp;
-
-export const TelegramInterface = {
-    init() {
-        tg.ready();
-        tg.expand();
-        tg.setHeaderColor('bg_color');
+export const telegramData = {
+    isAvailable: !!tg,
+    user: tg?.initDataUnsafe?.user || {
+        id: 123456,
+        first_name: "Mock",
+        last_name: "User",
+        username: "mockuser",
+        // Dummy photo for UI testing
+        photo_url: "https://ui-avatars.com/api/?name=Mock+User&background=38bdf8&color=fff&size=256"
     },
-
-    getUser() {
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            return tg.initDataUnsafe.user;
-        }
-        // Fallback for local development or testing in browser
-        console.warn("Telegram SDK not available or running outside Telegram. Returning mock user.");
-        return {
-            id: 111111111, // Mock ID
-            first_name: "Test",
-            last_name: "User",
-            username: "testuser",
-            language_code: "uk"
-        };
-    },
-
-    getThemeParams() {
-        return tg.themeParams;
-    },
-
-    setMainButton(text, onClick, isVisible = true) {
+    theme: tg?.themeParams || {},
+    initData: tg?.initData || "",
+    
+    ready: () => tg?.ready(),
+    expand: () => tg?.expand(),
+    close: () => tg?.close(),
+    
+    showMainButton: (text, callback) => {
+        if (!tg) return;
         tg.MainButton.setText(text);
-        if (isVisible) {
-            tg.MainButton.show();
-        } else {
-            tg.MainButton.hide();
-        }
-        
-        tg.MainButton.offClick(this._currentMainButtonHandler);
-        
-        this._currentMainButtonHandler = onClick;
-        if (onClick) {
-            tg.MainButton.onClick(onClick);
-        }
-    },
-
-    showMainButton() {
         tg.MainButton.show();
+        tg.MainButton.onClick(callback);
     },
-
-    hideMainButton() {
+    hideMainButton: () => {
+        if (!tg) {
+            console.log("Hiding main button (mock)");
+            return;
+        }
         tg.MainButton.hide();
-    },
-
-    showAlert(message) {
-        tg.showAlert(message);
-    },
-
-    showConfirm(message, callback) {
-        tg.showConfirm(message, callback);
+        tg.MainButton.offClick();
     }
-};
+}

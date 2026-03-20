@@ -1,108 +1,95 @@
-import { TelegramInterface } from './telegram.js';
-import { UI } from './ui.js';
-import { DB } from './api/db.js';
-import { PersonalPage } from './pages/personal.js';
-import { CoachPage } from './pages/coach.js';
+import { telegramData } from './telegram.js';
+import { supabase } from './supabase.js';
 
-// Application State
-const AppState = {
-    user: null,
-    dbUser: null,
-    currentTab: 'personal' // 'personal' or 'coach'
-};
+// Import views
+import { renderProfile } from './components/Profile.js';
+import { renderCatalog } from './components/Catalog.js';
+import { renderProgramView } from './components/ProgramView.js';
+import { renderExerciseCard } from './components/ExerciseCard.js';
+import { renderWorkoutMode } from './components/WorkoutMode.js';
 
-// --- CONFIGURATION ---
-// IMPORTANT: Replace these with real credentials when you create the Supabase project
-const SUPABASE_URL = ''; 
-const SUPABASE_KEY = '';
-
-async function initApp() {
-    TelegramInterface.init();
-    
-    // Check if we need to initialize Supabase
-    let isDbReady = false;
-    if (SUPABASE_URL && SUPABASE_KEY) {
-        isDbReady = DB.init(SUPABASE_URL, SUPABASE_KEY);
-    } else {
-        console.warn("Supabase credentials not set! App will not load real data.");
+// Basic SPA Router implementation
+export class Router {
+    constructor() {
+        this.appContainer = document.getElementById('app-container');
+        this.currentView = null;
+        this.history = [];
+        this.currentParams = {};
     }
 
-    const tgUser = TelegramInterface.getUser();
-    AppState.user = tgUser;
-    
-    UI.setUserName(tgUser.first_name || 'Спортсмен');
+    navigate(viewName, params = {}) {
+        if (this.currentView) {
+            this.history.push({ name: this.currentView, params: this.currentParams });
+        }
+        this.renderView(viewName, params);
+        this.updateNavUI(viewName);
+    }
 
-    UI.els.tabPersonal.addEventListener('click', () => switchTab('personal'));
-    UI.els.tabCoach.addEventListener('click', () => switchTab('coach'));
-    UI.els.fab.addEventListener('click', handleFabClick);
+    goBack() {
+        if (this.history.length > 0) {
+            const previous = this.history.pop();
+            this.renderView(previous.name, previous.params);
+            this.updateNavUI(previous.name);
+        } else {
+            this.navigate('catalog');
+        }
+    }
 
-    if (!isDbReady) {
-        console.log("Entering MOCK MODE for UI testing.");
-        // MOCK MODE
-        AppState.dbUser = { role: 'coach' }; // Give coach role for testing both tabs
-        UI.els.tabsContainer.classList.remove('hidden');
-        UI.els.tabsContainer.classList.add('flex');
+    renderView(viewName, params) {
+        this.currentView = viewName;
+        this.currentParams = params;
         
-        // Override DB methods for mock mode
-        DB.getWorkouts = async () => [
-            { created_at: new Date().toISOString(), exercise_name: 'Test Workout', weight: 50, reps: 10 }
-        ];
-        DB.getCoachClients = async () => [
-            { tg_id: 1, full_name: 'Test Client 1' },
-            { tg_id: 2, full_name: 'Test Client 2' }
-        ];
-        DB.addWorkout = async () => true;
+        // Add fade-in animation class
+        this.appContainer.className = 'h-screen w-full relative overflow-y-auto pb-24 safe-area-pb fade-in';
+        void this.appContainer.offsetWidth; // trigger reflow
 
-        switchTab('personal');
-        UI.hideLoading();
-        return;
-    }
-
-    try {
-        let dbUser = await DB.getUserRole(tgUser.id);
-        if (!dbUser) {
-            const fullName = `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim();
-            dbUser = await DB.registerUser(tgUser.id, fullName, 'client');
+        switch (viewName) {
+            case 'profile':
+                renderProfile(this.appContainer, params);
+                break;
+            case 'catalog':
+                renderCatalog(this.appContainer, params);
+                break;
+            case 'program':
+                renderProgramView(this.appContainer, params);
+                break;
+            case 'exercise':
+                renderExerciseCard(this.appContainer, params);
+                break;
+            case 'workout':
+                renderWorkoutMode(this.appContainer, params);
+                break;
+            default:
+                renderCatalog(this.appContainer, params);
         }
-        AppState.dbUser = dbUser;
-
-        if (dbUser && dbUser.role === 'coach') {
-            UI.els.tabsContainer.classList.remove('hidden');
-            UI.els.tabsContainer.classList.add('flex');
-        }
-
-        switchTab('personal');
-        UI.hideLoading();
-    } catch (e) {
-        console.error("App init error:", e);
-        UI.hideLoading();
-        TelegramInterface.showAlert("Помилка при завантаженні даних з БД. Перевірте консоль.");
     }
-}
 
-async function switchTab(tabId) {
-    if (tabId === 'coach' && AppState.dbUser?.role !== 'coach') {
-        TelegramInterface.showAlert("У вас немає доступу тренера.");
-        return;
-    }
-    
-    AppState.currentTab = tabId;
-    UI.switchTab(tabId);
-
-    if (tabId === 'personal') {
-        PersonalPage.render(AppState.user);
-    } else if (tabId === 'coach') {
-        CoachPage.render(AppState.user);
-    }
-}
-
-function handleFabClick() {
-    if (AppState.currentTab === 'personal') {
-        PersonalPage.openAddWorkoutModal(AppState.user, () => {
-             // Optional callback on added workout
+    updateNavUI(activeView) {
+        const navs = ['catalog', 'profile'];
+        navs.forEach(nav => {
+            const el = document.getElementById(`nav-${nav}`);
+            if (el) {
+                if(nav === activeView) {
+                   el.classList.add('text-brand-accent');
+                   el.classList.remove('text-slate-400');
+                } else {
+                   el.classList.add('text-slate-400');
+                   el.classList.remove('text-brand-accent');
+                }
+            }
         });
     }
 }
 
-// Start app
-document.addEventListener('DOMContentLoaded', initApp);
+// Global initialization
+document.addEventListener('DOMContentLoaded', () => {
+    // Let Telegram know WebApp is ready and expand it
+    telegramData.ready();
+    telegramData.expand();
+    
+    // Initialize Router globally
+    window.router = new Router();
+    window.router.navigate('catalog');
+    
+    console.log("Easy FIT initialized for user:", telegramData.user);
+});
